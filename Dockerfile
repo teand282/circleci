@@ -26,7 +26,9 @@ RUN apt update \
     python3-pip \
     zip \
     && python3 -m pip install --upgrade pip \
-    && pip install awscli==${AWSCLI_VERSION} docker-compose==${COMPOSE_VERSION}
+    && pip install awscli==${AWSCLI_VERSION} docker-compose==${COMPOSE_VERSION} \
+    && npm install -g snyk
+
 
 ADD tests /tests
 
