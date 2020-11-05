@@ -25,6 +25,8 @@ RUN apt update \
     python3 \
     python3-pip \
     zip \
+    nodejs \
+    npm \
     && python3 -m pip install --upgrade pip \
     && pip install awscli==${AWSCLI_VERSION} docker-compose==${COMPOSE_VERSION} \
     && npm install -g snyk
