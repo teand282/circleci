@@ -36,8 +36,8 @@ markDownString+=(
   `known issues, found *${json_data.uniqueCount}* ` + 
   `${json_data.uniqueCount > 1 ? 'issues' : 'issue'}.\n\n` +
   `<details>
-      <summary>Click to see details</summary>\n
-      `);
+  <summary>Click to see details</summary>\n
+`);
 
 markDownString+=(vulnOutput);
 
