@@ -95,7 +95,7 @@ jobs:
           command: |
             # This fails if the tag already exists
             # preventing a push to the docker hub.
-            git tag "containertest"
+            git tag "containertest0.1"
             git push --tags
 
       - run:
@@ -104,7 +104,7 @@ jobs:
 
       - run:
           name: Push the image
-          command: docker push $(./image)
+          command: docker push ${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}:containertest0.1
 
 workflows:
   version: 2
@@ -120,4 +120,4 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - add-container-scanning
