@@ -94,6 +94,7 @@ const checkDuplicate = (defaults, msg) => (
 (async () => {
   try {
     if (!process.argv[2] && !process.env.GITHUB_TOKEN) logAndExit("Did you pass GITHUB_TOKEN as env?", 1);
+    if (process.env.NO_COMMENT) logAndExit("Commenting vulnerability stats to PR is disabled", 0);
 
     /* Lets first check if we're in a Github Action or not */
     const defaults = process.env.GITHUB_TOKEN ? await parseGithubActions() : parseGithubCircleCI();
