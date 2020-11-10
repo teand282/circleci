@@ -5,9 +5,16 @@ if [ -z "${SNYK_TOKEN}" ]; then
   exit 1
 fi
 
-if [ -z "${GITHUB_PAT}" ]; then
-  echo "Please set GITHUB_PAT variable in CircleCI project settings"
+if [ -z "${GITHUB_ACCESS_TOKEN}" ]; then
+  echo "Please set GITHUB_ACCESS_TOKEN variable in CircleCI project settings"
   exit 1
+fi
+
+if [[ $CONTAINER_TAG ]]; then
+  TAG_NAME=$CONTAINER_TAG
+  echo "Tag from \$CONTAINER_TAG: $CONTAINER_TAG"
+else
+  TAG_NAME="latest"
 fi
 
 ## auth
@@ -17,7 +24,6 @@ snyk auth ${SNYK_TOKEN}
 PROJECT_PATH=$(eval echo ${CIRCLE_WORKING_DIRECTORY})
 
 ## set tag
-TAG_NAME=latest
 SNYK_FNAME=snyk.json
 
 ## lets retag the image
