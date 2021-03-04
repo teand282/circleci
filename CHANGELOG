@@ -1,3 +1,8 @@
+0.6.1
+---
+
+Add SNYK_SEVERITY_THRESHOLD env var to control the snyk results. Defaults to `high` only.
+
 0.6.0
 ---
 
