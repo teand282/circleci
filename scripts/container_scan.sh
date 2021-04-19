@@ -5,11 +5,6 @@ if [ -z "${SNYK_TOKEN}" ]; then
   exit 1
 fi
 
-if [ -z "${GITHUB_SNYK_TOKEN}" ]; then
-  echo "Please set GITHUB_SNYK_TOKEN variable in CircleCI project settings"
-  exit 1
-fi
-
 TAG_NAME=${CONTAINER_TAG:="latest"}
 export SEVERITY_THRESHOLD=${SNYK_SEVERITY_THRESHOLD:="high"}
 
