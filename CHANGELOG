@@ -1,3 +1,8 @@
+0.6.2
+---
+
+Removed the `GITHUB_SNYK_TOKEN`.  Only one Synk token in use.
+
 0.6.1
 ---
 
