@@ -28,6 +28,9 @@ snyk auth ${SNYK_TOKEN}
 ## set project path
 PROJECT_PATH=$(eval echo ${CIRCLE_WORKING_DIRECTORY})
 
+## set organisation
+snyk config set org=${SNYK_ORG}
+
 ## set tag
 SNYK_FNAME=snyk.json
 
@@ -39,10 +42,13 @@ snyk test --severity-threshold=${SEVERITY_THRESHOLD} --docker ${CIRCLE_PROJECT_R
 
 echo "[*] Finished snyk test. Moving onto monitor"
 
-## monitor
+## Send snapshot to Snyk for project dependency files
+snyk monitor --all-projects
+
+## Send snapshot to Snyk for issues with the Docker image ( and Base Image )
 snyk monitor --docker ${CIRCLE_PROJECT_REPONAME}:${TAG_NAME} --file="${PROJECT_PATH}/Dockerfile"
 
-echo "[*] Finished snyk monitoring. Checking if we need to send results to GitHub"
+echo "[*] Finished Snyk monitors. Checking if we need to send results to GitHub"
 
 ## parse results and check if we should comment back to GitHub
 if [[ -z "${CIRCLE_PULL_REQUEST}" ]]; then
