@@ -121,4 +121,3 @@ workflows:
             branches:
               only:
                 - master
-                - fix_synk_monitors
