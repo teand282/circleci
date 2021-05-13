@@ -43,7 +43,12 @@ snyk test --severity-threshold=${SEVERITY_THRESHOLD} --docker ${CIRCLE_PROJECT_R
 echo "[*] Finished snyk test. Moving onto monitor"
 
 ## Send snapshot to Snyk for project dependency files
-snyk monitor --all-projects
+## only perform operation when it is merge to Master / Main, given ~30-40second performance impact
+if [[ "${CIRCLE_BRANCH}" == 'master' ]] || [[ "${CIRCLE_BRANCH}" == 'main' ]]; then
+  # --remote-repo-url ensures that all projects created via --all-projects are grouped in the web ui
+  echo "[*] Monitoring all projects in repo post merge"
+  snyk monitor --all-projects --remote-repo-url="${CIRCLE_REPOSITORY_URL}"
+fi
 
 ## Send snapshot to Snyk for issues with the Docker image ( and Base Image )
 snyk monitor --docker ${CIRCLE_PROJECT_REPONAME}:${TAG_NAME} --file="${PROJECT_PATH}/Dockerfile"
