@@ -1,4 +1,4 @@
-# GLOBAL-ANCHORS
+# GLOBAL-ANCHORS - DockerHub Authentication changes applied - PROD-1431 / PROD-1435
 global_context: &global_context
   context:
     - org-global
@@ -18,9 +18,7 @@ defaults: &defaults
 version: 2
 
 jobs:
-
-  10e_build_image:
-    parallelism: 4
+  01_build_image:
     <<: *defaults
 
     steps:
@@ -34,10 +32,20 @@ jobs:
           command: |
             set -ex
             docker build -t $(./image) .
-          no_output_timeout: 300m 
 
-  10d_test_image:
-    parallelism: 4
+      - run:
+          name: Save Docker image
+          command: |
+            set -ex
+            mkdir -p workspace
+            docker save $(./image) --output workspace/${CIRCLE_SHA1}.tar
+
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - '*.tar'
+
+  02_test_image:
     <<: *defaults
 
     steps:
@@ -46,73 +54,70 @@ jobs:
 
       - checkout
 
-      - run:
-          name: Build Docker image
+      - attach_workspace:
+          at: workspace
+
+      - run: &import_image
+          name: Import Docker image
           command: |
             set -ex
-            docker build -t $(./image) .
-          no_output_timeout: 300m 
-            
-            
-  10c_push_image:
-    parallelism: 4
+            docker load --input workspace/${CIRCLE_SHA1}.tar
+
+      - run:
+          name: Check if dependecies are installed
+          command: |
+            set -ex
+            docker run "$(./image)" '/tests/tests.sh'
+
+  03_push_image:
     <<: *defaults
 
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            # Stored in 1password "Team:Release Eng"
+            # vault `id_rsa_circleci_circleci`
+            - "5e:7e:b1:3a:b0:65:dc:7c:07:52:fd:dd:a2:87:02:fc"
+
       - setup_remote_docker:
           reusable: true
 
       - checkout
 
-      - run:
-          name: Build Docker image
-          command: |
-            set -ex
-            docker build -t $(./image) .
-          no_output_timeout: 300m 
-            
-            
-  10b_build_image:
-    parallelism: 4
-    <<: *defaults
-
-    steps:
-      - setup_remote_docker:
-          reusable: true
-
-      - checkout
+      - attach_workspace:
+          at: workspace
 
       - run:
-          name: Build Docker image
-          command: |
-            set -ex
-            docker build -t $(./image) .
-          no_output_timeout: 300m 
-
-  10a_test_image:
-    parallelism: 4
-    <<: *defaults
-
-    steps:
-      - setup_remote_docker:
-          reusable: true
-
-      - checkout
+          <<: *import_image
 
       - run:
-          name: Build Docker image
+          name: Tag the git commit
           command: |
-            set -ex
-            docker build -t $(./image) .
-          no_output_timeout: 300m 
+            # This fails if the tag already exists
+            # preventing a push to the docker hub.
+            git tag "$(cat VERSION)"
+            git push --tags
+
+      - run:
+          name: Log in to Docker repository
+          command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+
+      - run:
+          name: Push the image
+          command: docker push $(./image)
 
 workflows:
   version: 2
   test:
     jobs:
-      - 10e_build_image
-      - 10d_test_image
-      - 10c_push_image
-      - 10b_build_image
-      - 10a_test_image
-
+      - 01_build_image
+      - 02_test_image:
+          requires:
+            - 01_build_image
+      - 03_push_image:
+          requires:
+            - 02_test_image
+          filters:
+            branches:
+              only:
+                - master
